@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import yt_dlp
 import os
+import re
 
 app = Flask(__name__)
 
@@ -16,9 +17,11 @@ def download():
     if not url:
         return jsonify({'error': 'No URL provided'}), 400
     
+    # تنظيف الرابط
+    url = clean_url(url)
+    
     try:
-        # إعدادات مختلفة حسب المنصة
-        ydl_opts = _get_options(url)
+        ydl_opts = get_options(url)
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
@@ -28,78 +31,176 @@ def download():
             if 'entries' in info and info['entries']:
                 for entry in info['entries']:
                     if entry:
-                        item = _extract_item(entry, index)
+                        item = extract_item(entry, index)
                         if item:
                             items.append(item)
                             index += 1
             else:
-                item = _extract_item(info, index)
+                item = extract_item(info, index)
                 if item:
                     items.append(item)
             
+            if not items:
+                return jsonify({'error': 'No downloadable media found'}), 404
+                
             return jsonify({'items': items})
             
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-def _get_options(url):
-    base_opts = {
+
+def clean_url(url):
+    """تنظيف الروابط من النصوص الزيادة"""
+    url = url.strip()
+    
+    # SoundCloud - استخراج الرابط من النص
+    if 'soundcloud.com' in url:
+        match = re.search(r'https?://(?:on\.)?soundcloud\.com/\S+', url)
+        if match:
+            return match.group(0)
+    
+    # Snapchat - تحويل للرابط الصح
+    if 'snapchat.com' in url:
+        return url
+    
+    return url
+
+
+def get_options(url):
+    """إعدادات yt-dlp حسب المنصة"""
+    
+    base = {
         'quiet': True,
         'no_warnings': True,
         'extract_flat': False,
+        'socket_timeout': 30,
     }
     
     url_lower = url.lower()
     
-    # Snapchat
-    if 'snapchat.com' in url_lower:
-        base_opts.update({
-            'extractor_args': {'snapchat': {'stories': True}},
+    # TikTok
+    if 'tiktok.com' in url_lower:
+        base.update({
+            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15',
+            },
         })
     
-    # Instagram Stories
-    elif 'instagram.com/stories' in url_lower:
-        base_opts.update({
-            'cookiesfrombrowser': None,
-        })
-    
-    # Facebook
-    elif 'facebook.com' in url_lower or 'fb.watch' in url_lower:
-        base_opts.update({
-            'format': 'best',
-        })
+    # YouTube & YouTube Music & Shorts
+    elif 'youtube.com' in url_lower or 'youtu.be' in url_lower or 'music.youtube.com' in url_lower:
+        if 'music.youtube.com' in url_lower:
+            base.update({
+                'format': 'bestaudio[ext=m4a]/bestaudio/best',
+            })
+        else:
+            base.update({
+                'format': 'bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+            })
     
     # Pinterest
     elif 'pinterest.com' in url_lower or 'pin.it' in url_lower:
-        base_opts.update({
+        base.update({
             'format': 'best',
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            },
         })
     
     # Reddit
     elif 'reddit.com' in url_lower or 'redd.it' in url_lower:
-        base_opts.update({
+        base.update({
             'format': 'best',
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            },
         })
     
     # Kwai
-    elif 'kwai.com' in url_lower:
-        base_opts.update({
+    elif 'kwai.com' in url_lower or 'kwai.me' in url_lower:
+        base.update({
+            'format': 'best',
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Linux; Android 12; SM-G991B) AppleWebKit/537.36',
+                'Referer': 'https://www.kwai.com/',
+            },
+        })
+    
+    # Instagram (بدون stories)
+    elif 'instagram.com' in url_lower:
+        if 'stories' in url_lower:
+            return jsonify({'error': 'Instagram stories require login'}), 401
+        base.update({
+            'format': 'best',
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)',
+            },
+        })
+    
+    # Facebook (بدون stories)
+    elif 'facebook.com' in url_lower or 'fb.watch' in url_lower:
+        if 'stories' in url_lower:
+            return jsonify({'error': 'Facebook stories require login'}), 401
+        base.update({
             'format': 'best',
         })
     
-    return base_opts
+    # SoundCloud
+    elif 'soundcloud.com' in url_lower:
+        base.update({
+            'format': 'bestaudio/best',
+        })
+    
+    # Twitter/X
+    elif 'twitter.com' in url_lower or 'x.com' in url_lower:
+        base.update({
+            'format': 'best',
+        })
+    
+    # LinkedIn
+    elif 'linkedin.com' in url_lower:
+        base.update({
+            'format': 'best',
+        })
+    
+    # Snapchat
+    elif 'snapchat.com' in url_lower:
+        base.update({
+            'format': 'best',
+        })
+    
+    else:
+        base.update({'format': 'best'})
+    
+    return base
 
-def _extract_item(info, index):
+
+def extract_item(info, index):
+    """استخراج بيانات الميديا"""
     try:
         formats = info.get('formats', [])
         url_direct = info.get('url', '')
+        webpage_url = info.get('webpage_url', '')
+        ext = info.get('ext', '')
         
-        # لو مفيش formats خد الـ url مباشرة
+        # لو صورة مباشرة
+        if ext in ['jpg', 'jpeg', 'png', 'webp']:
+            return {
+                'index': index,
+                'url': url_direct or webpage_url,
+                'type': 'image',
+                'quality': 'Original',
+                'thumbnail': info.get('thumbnail', ''),
+                'duration': '',
+            }
+        
+        # لو مفيش formats
         if not formats and url_direct:
+            media_type = 'audio' if ext in ['mp3', 'm4a', 'aac', 'opus'] else 'video'
             return {
                 'index': index,
                 'url': url_direct,
-                'type': _get_type(info),
+                'type': media_type,
                 'quality': 'HD',
                 'thumbnail': info.get('thumbnail', ''),
                 'duration': str(info.get('duration', '')),
@@ -107,36 +208,31 @@ def _extract_item(info, index):
         
         best_video = None
         best_audio = None
-        best_image = None
         
         for f in formats:
-            ext = f.get('ext', '')
+            if not f.get('url'):
+                continue
+            f_ext = f.get('ext', '')
             vcodec = f.get('vcodec', 'none')
             acodec = f.get('acodec', 'none')
             
-            # صورة
-            if ext in ['jpg', 'jpeg', 'png', 'webp']:
-                best_image = f
-            # فيديو مع صوت
+            if f_ext in ['jpg', 'jpeg', 'png', 'webp']:
+                return {
+                    'index': index,
+                    'url': f['url'],
+                    'type': 'image',
+                    'quality': 'Original',
+                    'thumbnail': info.get('thumbnail', ''),
+                    'duration': '',
+                }
             elif vcodec != 'none' and acodec != 'none':
                 if best_video is None or (f.get('height', 0) or 0) > (best_video.get('height', 0) or 0):
                     best_video = f
-            # صوت فقط
             elif vcodec == 'none' and acodec != 'none':
                 if best_audio is None or (f.get('abr', 0) or 0) > (best_audio.get('abr', 0) or 0):
                     best_audio = f
         
-        # اختار الأفضل
-        if best_image:
-            return {
-                'index': index,
-                'url': best_image['url'],
-                'type': 'image',
-                'quality': 'Original',
-                'thumbnail': info.get('thumbnail', ''),
-                'duration': '',
-            }
-        elif best_video:
+        if best_video:
             height = best_video.get('height', 0) or 0
             return {
                 'index': index,
@@ -159,7 +255,7 @@ def _extract_item(info, index):
             return {
                 'index': index,
                 'url': url_direct,
-                'type': _get_type(info),
+                'type': 'video',
                 'quality': 'HD',
                 'thumbnail': info.get('thumbnail', ''),
                 'duration': str(info.get('duration', '')),
@@ -167,16 +263,9 @@ def _extract_item(info, index):
         
         return None
         
-    except Exception as e:
+    except Exception:
         return None
 
-def _get_type(info):
-    ext = info.get('ext', '')
-    if ext in ['jpg', 'jpeg', 'png', 'webp']:
-        return 'image'
-    elif ext in ['mp3', 'aac', 'm4a', 'opus']:
-        return 'audio'
-    return 'video'
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
