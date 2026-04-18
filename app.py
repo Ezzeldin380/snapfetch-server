@@ -146,10 +146,15 @@ def get_options(url):
         })
     
     # SoundCloud
-    elif 'soundcloud.com' in url_lower:
-        base.update({
-            'format': 'bestaudio/best',
-        })
+elif 'soundcloud.com' in url_lower:
+    base.update({
+        'format': 'bestaudio[ext=mp3]/bestaudio/best',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+    })
     
     # Twitter/X
     elif 'twitter.com' in url_lower or 'x.com' in url_lower:
