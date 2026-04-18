@@ -2,8 +2,7 @@ from flask import Flask, request, jsonify
 import yt_dlp
 import os
 import re
-import subprocess
-subprocess.run(['apt-get', 'install', '-y', 'ffmpeg'], capture_output=True)
+
 app = Flask(__name__)
 
 @app.route('/')
@@ -18,7 +17,6 @@ def download():
     if not url:
         return jsonify({'error': 'No URL provided'}), 400
     
-    # تنظيف الرابط
     url = clean_url(url)
     
     try:
@@ -51,25 +49,15 @@ def download():
 
 
 def clean_url(url):
-    """تنظيف الروابط من النصوص الزيادة"""
     url = url.strip()
-    
-    # SoundCloud - استخراج الرابط من النص
     if 'soundcloud.com' in url:
         match = re.search(r'https?://(?:on\.)?soundcloud\.com/\S+', url)
         if match:
             return match.group(0)
-    
-    # Snapchat - تحويل للرابط الصح
-    if 'snapchat.com' in url:
-        return url
-    
     return url
 
 
 def get_options(url):
-    """إعدادات yt-dlp حسب المنصة"""
-    
     base = {
         'quiet': True,
         'no_warnings': True,
@@ -79,27 +67,20 @@ def get_options(url):
     
     url_lower = url.lower()
     
-    # TikTok
     if 'tiktok.com' in url_lower:
         base.update({
-            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+            'format': 'best[ext=mp4]/best',
             'http_headers': {
                 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15',
             },
         })
     
-    # YouTube & YouTube Music & Shorts
-    elif 'youtube.com' in url_lower or 'youtu.be' in url_lower or 'music.youtube.com' in url_lower:
+    elif 'youtube.com' in url_lower or 'youtu.be' in url_lower:
         if 'music.youtube.com' in url_lower:
-            base.update({
-                'format': 'bestaudio[ext=m4a]/bestaudio/best',
-            })
+            base.update({'format': 'bestaudio/best'})
         else:
-            base.update({
-                'format': 'bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-            })
+            base.update({'format': 'best[ext=mp4]/best'})
     
-    # Pinterest
     elif 'pinterest.com' in url_lower or 'pin.it' in url_lower:
         base.update({
             'format': 'best',
@@ -108,7 +89,6 @@ def get_options(url):
             },
         })
     
-    # Reddit
     elif 'reddit.com' in url_lower or 'redd.it' in url_lower:
         base.update({
             'format': 'best',
@@ -117,7 +97,6 @@ def get_options(url):
             },
         })
     
-    # Kwai
     elif 'kwai.com' in url_lower or 'kwai.me' in url_lower:
         base.update({
             'format': 'best',
@@ -127,10 +106,7 @@ def get_options(url):
             },
         })
     
-    # Instagram (بدون stories)
     elif 'instagram.com' in url_lower:
-        if 'stories' in url_lower:
-            return jsonify({'error': 'Instagram stories require login'}), 401
         base.update({
             'format': 'best',
             'http_headers': {
@@ -138,42 +114,25 @@ def get_options(url):
             },
         })
     
-    # Facebook (بدون stories)
     elif 'facebook.com' in url_lower or 'fb.watch' in url_lower:
-        if 'stories' in url_lower:
-            return jsonify({'error': 'Facebook stories require login'}), 401
+        base.update({'format': 'best'})
+    
+    elif 'soundcloud.com' in url_lower:
         base.update({
-            'format': 'best',
+            'format': 'bestaudio/best',
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            },
         })
     
-    # SoundCloud
-elif 'soundcloud.com' in url_lower:
-    base.update({
-        'format': 'bestaudio[ext=mp3]/bestaudio/best',
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
-    })
-    
-    # Twitter/X
     elif 'twitter.com' in url_lower or 'x.com' in url_lower:
-        base.update({
-            'format': 'best',
-        })
+        base.update({'format': 'best'})
     
-    # LinkedIn
     elif 'linkedin.com' in url_lower:
-        base.update({
-            'format': 'best',
-        })
+        base.update({'format': 'best'})
     
-    # Snapchat
     elif 'snapchat.com' in url_lower:
-        base.update({
-            'format': 'best',
-        })
+        base.update({'format': 'best'})
     
     else:
         base.update({'format': 'best'})
@@ -182,14 +141,12 @@ elif 'soundcloud.com' in url_lower:
 
 
 def extract_item(info, index):
-    """استخراج بيانات الميديا"""
     try:
         formats = info.get('formats', [])
         url_direct = info.get('url', '')
         webpage_url = info.get('webpage_url', '')
         ext = info.get('ext', '')
         
-        # لو صورة مباشرة
         if ext in ['jpg', 'jpeg', 'png', 'webp']:
             return {
                 'index': index,
@@ -200,7 +157,6 @@ def extract_item(info, index):
                 'duration': '',
             }
         
-        # لو مفيش formats
         if not formats and url_direct:
             media_type = 'audio' if ext in ['mp3', 'm4a', 'aac', 'opus'] else 'video'
             return {
