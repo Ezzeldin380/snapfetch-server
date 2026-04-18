@@ -2,7 +2,8 @@ from flask import Flask, request, jsonify
 import yt_dlp
 import os
 import re
-
+import subprocess
+subprocess.run(['apt-get', 'install', '-y', 'ffmpeg'], capture_output=True)
 app = Flask(__name__)
 
 @app.route('/')
