@@ -93,24 +93,24 @@ def get_options(url):
         if cookies:
             base['cookiefile'] = cookies
 
-    elif 'instagram.com' in url_lower:
-        cookies = get_cookies_file('instagram')
-        base.update({
-            'format': 'best',
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)',
-            },
-        })
-        if cookies:
-            base['cookiefile'] = cookies
+elif 'instagram.com' in url_lower:
+    cookies = get_cookies_file('instagram')
+    base.update({
+        'format': 'bestvideo[ext=mp4]+bestaudio/best[ext=mp4]/best',
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)',
+        },
+    })
+    if cookies:
+        base['cookiefile'] = cookies
 
-    elif 'facebook.com' in url_lower or 'fb.watch' in url_lower:
-        cookies = get_cookies_file('facebook')
-        base.update({
-            'format': 'best[ext=mp4]/best',
-        })
-        if cookies:
-            base['cookiefile'] = cookies
+elif 'facebook.com' in url_lower or 'fb.watch' in url_lower:
+    cookies = get_cookies_file('facebook')
+    base.update({
+        'format': 'bestvideo[ext=mp4]+bestaudio/best[ext=mp4]/best',
+    })
+    if cookies:
+        base['cookiefile'] = cookies
 
     elif 'twitter.com' in url_lower or 'x.com' in url_lower:
         cookies = get_cookies_file('twitter')
@@ -216,6 +216,7 @@ def extract_item(info, index):
             f_ext = f.get('ext', '')
             vcodec = f.get('vcodec', 'none')
             acodec = f.get('acodec', 'none')
+            height = f.get('height', 0) or 0
             
             if f_ext in ['jpg', 'jpeg', 'png', 'webp']:
                 return {
@@ -226,13 +227,20 @@ def extract_item(info, index):
                     'thumbnail': info.get('thumbnail', ''),
                     'duration': '',
                 }
+            # فيديو مع صوت معاً
             elif vcodec != 'none' and acodec != 'none':
-                if best_video is None or (f.get('height', 0) or 0) > (best_video.get('height', 0) or 0):
+                if best_video is None or height > (best_video.get('height', 0) or 0):
                     best_video = f
+            # فيديو بدون صوت - نتجاهله لو فيه فيديو مع صوت
+            elif vcodec != 'none' and acodec == 'none':
+                if best_video is None:
+                    best_video = f
+            # صوت فقط
             elif vcodec == 'none' and acodec != 'none':
                 if best_audio is None or (f.get('abr', 0) or 0) > (best_audio.get('abr', 0) or 0):
                     best_audio = f
         
+        # الأولوية للفيديو دايماً
         if best_video:
             height = best_video.get('height', 0) or 0
             return {
