@@ -1,0 +1,50 @@
+# Netscape HTTP Cookie File
+# https://curl.haxx.se/rfc/cookie_spec.html
+# This is a generated file! Do not edit.
+
+.soundcloud.com	TRUE	/	FALSE	1808124703	sc_tracking_anonymous_id	%22ed659f7c-236f-42be-abbb-eb6576a90829%22
+soundcloud.com	FALSE	/	FALSE	1779180654	cw-test-00000000_htlbid-tude_0_100	tude
+.soundcloud.com	TRUE	/	FALSE	1811148654	sc_theme	dark
+soundcloud.com	FALSE	/	FALSE	1779180655	cw-test-20250908_bcss_50_50	control
+soundcloud.com	FALSE	/	FALSE	1779180655	cw-test-20250625_prebid-v2-test_1_99	control
+soundcloud.com	FALSE	/	FALSE	1779180655	cw-test-20251027_triplelift-test_10_90	no-triplelift
+soundcloud.com	FALSE	/	FALSE	1779180655	cw-test-20250425_refresh-viewable-test_30_70	control
+.soundcloud.com	TRUE	/	FALSE	1777193455	sc_session	{%22id%22:%224DA60B3A-10AD-4C04-8B07-A0EF25948956%22%2C%22lastBecameInactive%22:null}
+.soundcloud.com	TRUE	/	FALSE	1811148655	sc_anonymous_id	162580-490341-341787-912725
+.soundcloud.com	TRUE	/	FALSE	0	cookie_consent	1
+.soundcloud.com	TRUE	/	FALSE	1808124656	sclocale	ar
+.soundcloud.com	TRUE	/	FALSE	1776675055	panoramaId_expiry	1776675055510
+.soundcloud.com	TRUE	/	FALSE	1799916655	_cc_id	6fb0c8189d83249f84f17b143b2a83b
+.soundcloud.com	TRUE	/	FALSE	1776675058	_gid	GA1.2.1133921485.1776588656
+.soundcloud.com	TRUE	/	FALSE	1810295454	cto_bidid	-4pCjl8lMkZ1aWs2cGh3a0haaSUyRjZ5bVdlUmFhc0V1TUpvQVhUWml0WUVoRU9WckVhdVhoMXdXNVF2Y2xQOHEzeDQlMkJ3bHFJNXY2ZzFnTmswMjM3NVolMkZlRGsxSTFBJTNEJTNE
+.soundcloud.com	TRUE	/	FALSE	1784364701	_fbp	fb.1.1776588656396.353022761472152260
+.soundcloud.com	TRUE	/	TRUE	1784364656	_rdt_uuid	1776588656438.e500b81d-f6a3-42f2-8176-d841d20fac53
+.soundcloud.com	TRUE	/	FALSE	1811148657	afUserId	f79ecea2-96ae-4cb0-8712-0be25863475f-p
+.soundcloud.com	TRUE	/	FALSE	1777189856	AF_SYNC	1776588656605
+.soundcloud.com	TRUE	/	TRUE	1808124658	OptanonAlertBoxClosed	2026-04-19T08:50:58.420Z
+.soundcloud.com	TRUE	/	FALSE	1784364658	_gcl_au	1.1.829362632.1776588658
+.soundcloud.com	TRUE	/	TRUE	1808124658	eupubconsent-v2	CQi5_TAQi5_TAAcABBENCbFsAP_gAEPgAAYgMXNR_G__bWlr-bb3abtkeYxP9_hr7sQxBgbJk24FzLvW7JwHx2E5NAzatqIKmRIAu3TBIQNlHJDURUCgKIgFryDMaE2U4TNKJ6BkiFMZA2tYCFxvm4tjWQCY4ur_9lc1mB-t7dr82dzyy6hHn3a5fmS1UJCdIYetDfv8ZBOT-9IEd-x8v4v4_EbpEm8eS1n_pGtp4jd6YnM_dBmxt-Tyff7Pn__rl_e7X_ve_n3zv8oXH7rr____f_-7___2b_-___b-__7J_zBiwAEwkOiCMsiBQIFAQggQAKCsIAKBAEAACQNEBACYMCHIGAC6wmQAgBQADBACAAEGAAIAABIAEIgAgAIBACBAIFAAGABAEBAAwMAAYALEQCAAEB0DFMCCAQLABIjKoNMCEABIICWyoQSgYEFcIUixwCCBETBQAAAgAFAAAgPhYCEkoJWJBAFxBdAAgAAABRAiwIpCzAEFQZotBWBJwGRpgGT5gmSU6CIAmCEjIMiE1QSDxTFEKCHIDYpZgDp4goAZdrJCH-oFgBhIAIAFR0AEACpSACABUAAA.f_wACHwAAAAA.IMXNR_G__bXlv-bb36btkeYxf9_hr7sQxBgbJs24FzLvW7JwH32E7NEzatqYKmRIAu3TBIQNtHJjURUChKIgVrzDsaE2U4TtKJ-BkiHMZY2tYCFxvm4tjWQCZ4ur_91d9mR-t7dr-2dzy27hnv3a9fuS1UJidKYetHfv8ZBOT-_IU9_x-_4v4_MbpEm8eS1v_tWtt43d64vP_dpuxt-Tyff7____73_e7X__e__33_-qXX_r7____________f__________9__A
+.soundcloud.com	TRUE	/	FALSE	1810457458	__qca	P1-d050f0be-efb1-4708-b401-fd19b2849780
+.soundcloud.com	TRUE	/	TRUE	1810284658	__gads	ID=1204501748d5aef8:T=1776588658:RT=1776588658:S=ALNI_Mal-MTQykk1mziT4pTycKclhbid_Q
+.soundcloud.com	TRUE	/	TRUE	1810284658	__gpi	UID=000013ce7b3ccef6:T=1776588658:RT=1776588658:S=ALNI_Mb1yyxgh3iib1rD9nfeEPLTo7f31A
+.soundcloud.com	TRUE	/	TRUE	1792140658	__eoi	ID=65c13a6c78631415:T=1776588658:RT=1776588658:S=AA-AfjZDpQH9xQ-1BFqLjh0Ag2Cu
+.soundcloud.com	TRUE	/	TRUE	1808124658	OptanonConsent	isGpcEnabled=0&datestamp=Sun+Apr+19+2026+10%3A50%3A58+GMT%2B0200+(%D8%AA%D9%88%D9%82%D9%8A%D8%AA+%D8%B4%D8%B1%D9%82+%D8%A3%D9%88%D8%B1%D9%88%D8%A8%D8%A7+%D8%A7%D9%84%D8%B1%D8%B3%D9%85%D9%8A)&version=202603.1.0&browserGpcFlag=0&isIABGlobal=false&identifierType=Cookie+Unique+Id&hosts=&consentId=4e216ac7-24e9-4a45-96c6-10fd70c345b6&interactionCount=1&isAnonUser=1&prevHadToken=0&landingPath=NotLandingPage&groups=C0001%3A1%2CC0003%3A1%2CC0004%3A1%2CC0002%3A1%2CV2STACK42%3A1&iType=1&intType=1&crTime=1776588658910
+.soundcloud.com	TRUE	/	FALSE	1810284659	cto_bundle	1Q11O19Cb041Ym1Uc2VrMHBzY2JBQWtkbGVoZjNOTGJueXc5ZW54cVdURnh0b1BJdThpYW5ydG9EYXFBQjdRZUF0eW5wUWJQMiUyRkFrWEZQQUY1NllSRkNFTzNxNWJnbWNBRVRRZGx0WEdhbzhiTzdsaDROdHFJcGppNG9WVmRSZG9WJTJCZUpybUJkdTR2TWphNzMyRFJ1TW9JSnJRJTNEJTNE
+.soundcloud.com	TRUE	/	FALSE	1776588721	_gat_gtag_UA_2519404_44	1
+.soundcloud.com	TRUE	/	TRUE	1776675064	google_auth_nonce	NAlZVMUu7nmFFGAJfHV41o82bFekFzCTZB_L9HRqhtqUy9HRDt_plXv968LfMcxe
+.soundcloud.com	TRUE	/	TRUE	0	connect_session	1
+.soundcloud.com	TRUE	/	TRUE	0	soundcloud_session_hint	1
+soundcloud.com	FALSE	/	TRUE	1808124701	oauth_token	2-321407-1695945419-UnWh9RwWeKKgm
+.soundcloud.com	TRUE	/	TRUE	1811148701	_ga	GA1.1.18837357.1776588656
+.soundcloud.com	TRUE	/	FALSE	1808124702	sc_tracking_user_id	%22soundcloud%3Ausers%3A1695945419%22
+.soundcloud.com	TRUE	/	FALSE	1779180701	ja	0
+.soundcloud.com	TRUE	/	TRUE	1811148702	_ga_HXKL0JJB2D	GS2.1.s1776588656$o1$g1$t1776588701$j17$l0$h1653651450
+.soundcloud.com	TRUE	/	TRUE	1810284701	_scor_uid	fcdfb46ad03a48e0a5184ec759c29b35
+.soundcloud.com	TRUE	/	TRUE	1811148703	moe_c_s	1
+.soundcloud.com	TRUE	/	TRUE	1811148704	moe_uuid	b4e1c868-ffee-418a-acc3-3a5f1c4b4d29
+.soundcloud.com	TRUE	/	TRUE	1811148703	moe_i_m	DcXbDcAgCAXQXZgAFPGxTHOtkDhAvxp3b7_OS8-1afzsRYOAyKW5iEU1Lzcb1249UEThOpGyuYBFGVHZRZNF6YimsjAznfMB
+.soundcloud.com	TRUE	/	TRUE	1811148702	_ga_2MW685RTN1	GS2.1.s1776588701$o1$g1$t1776588701$j60$l0$h0
+.soundcloud.com	TRUE	/	TRUE	1811148704	moe_u_d	HY5BCoQwDEXvkrVC0yZp62UktQkMCAOjzka8-ziu_n-r905QmE44Xv0_X5hA1RMXQxTPYrwECblKdWUkNWoakxhqQArqORhSFOeqXgi7tgQDHLPuMGHOwqXkcJ94XQNs83u9Na7rZgP0WXu3m_fP8eDTAL1FJCYZ0Y1G4iJj41RHZmyxsPliDtcP
+.soundcloud.com	TRUE	/	TRUE	1811148703	moe_s_n	PYpBDoMgEEXvMmtJBgrMjFdpmkkRmjRGXeDOeHfBhbv_3n8HVJ1hBColfxOjcUmK8c5PhiVH4-kVknVRfj7D0OKqO4yWKAZmwjaw2-W2jA0m_eve8f3pT3l6wYBObBhg1U1rs-cF
+.soundcloud.com	TRUE	/	TRUE	1808124703	datadome	va~QbGDSsUOjnbc8Bo6Jspu4ejLgEoNZO4q0RY6CYob4ydW4j9huPDR5VgFQs_uGWHJZTd8Prz9PJFQocWKq9wKAPe3P5Zjo_kn7ozxU7whoK2R5An00zhQ3uaI~piQs
+.soundcloud.com	TRUE	/	TRUE	1808124703	extole_access_token	9SU8QR2A3KRTOTE8PU0F7FDONQ
