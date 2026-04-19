@@ -1,0 +1,24 @@
+# Netscape HTTP Cookie File
+# https://curl.haxx.se/rfc/cookie_spec.html
+# This is a generated file! Do not edit.
+
+www.kwai.com	FALSE	/	FALSE	0	kpn	KWAI.ME
+www.kwai.com	FALSE	/	FALSE	0	apptype	44
+www.kwai.com	FALSE	/	FALSE	0	sys	KWAI_ME
+www.kwai.com	FALSE	/	FALSE	0	client_type	3004
+www.kwai.com	FALSE	/	FALSE	0	bucket	egy
+www.kwai.com	FALSE	/	FALSE	0	client_key	65890b29
+www.kwai.com	FALSE	/	FALSE	0	countryInfo	EGY
+.kwai.com	TRUE	/	FALSE	1808124848	_did	web_384418361875A8D8
+www.kwai.com	FALSE	/	FALSE	1808124897	webDid	d00d2af2-41b3-4c9d-b28d-b2f62c51856e
+www.kwai.com	FALSE	/	FALSE	1808124897	did	d00d2af2-41b3-4c9d-b28d-b2f62c51856e
+www.kwai.com	FALSE	/	FALSE	0	sessionId	7dc70383-17a3-4315-80be-37ddb8bffc9d
+.kwai.com	TRUE	/	FALSE	1808124849	kwai_uuid	0ce56daecb261456c0d7f9ffdde38da2
+.kwai.com	TRUE	/	FALSE	1776761649	_k_gid_collect	1
+.kwai.com	TRUE	/	FALSE	1776675249	_k_cp	1
+.kwai.com	TRUE	/	FALSE	1810284898	FCCDCF	%5Bnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C%5B%5B32%2C%22%5B%5C%222433b664-8398-43a2-93fd-7cb2504151f6%5C%22%2C%5B1776588849%2C519000000%5D%5D%22%5D%5D%5D
+.kwai.com	TRUE	/	FALSE	1808124899	FCNEC	%5B%5B%22AKsRol-3NUtMT2DtxUCLAYi29Rl6WT35amYRiUEeKp0znnfQBGT-K9u2GBHeeC_oqKI57ofxKY2aC1GUJtL2WRAGhZBOlwj6b9J77ZWIh_gn3-yHLPmEVwDNSnP3b5GnmLZ1RJiOaiP10i25_o2DZjK6DGeE40HOeg%3D%3D%22%5D%5D
+www.kwai.com	FALSE	/	TRUE	0	userId	150001743569724
+www.kwai.com	FALSE	/	FALSE	0	kwaipro.pwa_st	Cg5rd2FpcHJvLnB3YS5zdBKQAdK0x57JEdSxL7Ud3O5Nocbgnz1PBSItnK_klbIzCcLGikXPI3ChpumMc3wEH0Q-6H41cfxV3jRup-xbTkqRjk19Gf5cqhgPl-dgZB8Xp-WZpaPJb448709zpmLeFAFwjz9404RtZr4wxfR5X6X8eeQV5Nut3fOAI8sFBBabY-cwDJRjBY8Z9TuS0W92kOlJAxoSWAqI-agjKYwl6IiFqTNICwdPIiDVf_EOCwghNlwexZHWuMX9hqRjUTh4A7M6K4YfIcgx0ygFMAE
+www.kwai.com	FALSE	/	FALSE	0	kwaipro.pwa_ph	0aa5be8c0cb448d9bd9eeb4db18ed24d0fe1
+www.kwai.com	FALSE	/	FALSE	0	i18n_redirected	
