@@ -69,16 +69,16 @@ def get_options(url):
     
     if 'tiktok.com' in url_lower:
     base.update({
-        'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+        'format': 'best',
         'http_headers': {
-            'User-Agent': 'com.zhiliaoapp.musically/2022600030 (Linux; U; Android 12; en_US; Pixel 6; Build/SQ3A.220705.003)',
-            'Referer': 'https://www.tiktok.com/',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
         },
-        'extractor_args': {
-            'tiktok': {
-                'webpage_download': True,
-            }
-        },
+        'cookiefile': None,
+        'nocheckcertificate': True,
     })
     
     elif 'youtube.com' in url_lower or 'youtu.be' in url_lower:
