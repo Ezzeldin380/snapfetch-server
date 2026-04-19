@@ -68,12 +68,18 @@ def get_options(url):
     url_lower = url.lower()
     
     if 'tiktok.com' in url_lower:
-        base.update({
-            'format': 'best[ext=mp4]/best',
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15',
-            },
-        })
+    base.update({
+        'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+        'http_headers': {
+            'User-Agent': 'com.zhiliaoapp.musically/2022600030 (Linux; U; Android 12; en_US; Pixel 6; Build/SQ3A.220705.003)',
+            'Referer': 'https://www.tiktok.com/',
+        },
+        'extractor_args': {
+            'tiktok': {
+                'webpage_download': True,
+            }
+        },
+    })
     
     elif 'youtube.com' in url_lower or 'youtu.be' in url_lower:
         if 'music.youtube.com' in url_lower:
@@ -114,8 +120,13 @@ def get_options(url):
             },
         })
     
-    elif 'facebook.com' in url_lower or 'fb.watch' in url_lower:
-        base.update({'format': 'best'})
+    elif 'facebook.com' in url_lower or 'fb.watch' in url_lower or 'fb.com' in url_lower:
+    base.update({
+        'format': 'bestvideo[ext=mp4]+bestaudio/best[ext=mp4]/best',
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        },
+    })
     
     elif 'soundcloud.com' in url_lower:
         base.update({
