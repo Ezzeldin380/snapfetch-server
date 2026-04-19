@@ -5,6 +5,12 @@ import re
 
 app = Flask(__name__)
 
+COOKIES_DIR = os.path.join(os.path.dirname(__file__), 'cookies')
+
+def get_cookies_file(platform):
+    path = os.path.join(COOKIES_DIR, f'{platform}.txt')
+    return path if os.path.exists(path) else None
+
 @app.route('/')
 def home():
     return jsonify({'status': 'SnapFetch Server Running!'})
@@ -68,36 +74,80 @@ def get_options(url):
     url_lower = url.lower()
     
     if 'tiktok.com' in url_lower:
-    base.update({
-        'format': 'best',
-        'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        },
-    })
-    
+        cookies = get_cookies_file('tiktok')
+        base.update({
+            'format': 'best[ext=mp4]/best',
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            },
+        })
+        if cookies:
+            base['cookiefile'] = cookies
+
     elif 'youtube.com' in url_lower or 'youtu.be' in url_lower:
+        cookies = get_cookies_file('youtube')
         if 'music.youtube.com' in url_lower:
             base.update({'format': 'bestaudio/best'})
         else:
             base.update({'format': 'best[ext=mp4]/best'})
-    
-    elif 'pinterest.com' in url_lower or 'pin.it' in url_lower:
+        if cookies:
+            base['cookiefile'] = cookies
+
+    elif 'instagram.com' in url_lower:
+        cookies = get_cookies_file('instagram')
         base.update({
             'format': 'best',
             'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)',
             },
         })
-    
+        if cookies:
+            base['cookiefile'] = cookies
+
+    elif 'facebook.com' in url_lower or 'fb.watch' in url_lower:
+        cookies = get_cookies_file('facebook')
+        base.update({
+            'format': 'best[ext=mp4]/best',
+        })
+        if cookies:
+            base['cookiefile'] = cookies
+
+    elif 'twitter.com' in url_lower or 'x.com' in url_lower:
+        cookies = get_cookies_file('twitter')
+        base.update({'format': 'best'})
+        if cookies:
+            base['cookiefile'] = cookies
+
     elif 'reddit.com' in url_lower or 'redd.it' in url_lower:
+        cookies = get_cookies_file('reddit')
         base.update({
             'format': 'best',
             'http_headers': {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
             },
         })
-    
+        if cookies:
+            base['cookiefile'] = cookies
+
+    elif 'pinterest.com' in url_lower or 'pin.it' in url_lower:
+        cookies = get_cookies_file('pinterest')
+        base.update({
+            'format': 'best',
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            },
+        })
+        if cookies:
+            base['cookiefile'] = cookies
+
+    elif 'snapchat.com' in url_lower:
+        cookies = get_cookies_file('snapchat')
+        base.update({'format': 'best'})
+        if cookies:
+            base['cookiefile'] = cookies
+
     elif 'kwai.com' in url_lower or 'kwai.me' in url_lower:
+        cookies = get_cookies_file('kwai')
         base.update({
             'format': 'best',
             'http_headers': {
@@ -105,40 +155,24 @@ def get_options(url):
                 'Referer': 'https://www.kwai.com/',
             },
         })
-    
-    elif 'instagram.com' in url_lower:
-        base.update({
-            'format': 'best',
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)',
-            },
-        })
-    
-    elif 'facebook.com' in url_lower or 'fb.watch' in url_lower or 'fb.com' in url_lower:
-    base.update({
-        'format': 'bestvideo[ext=mp4]+bestaudio/best[ext=mp4]/best',
-        'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        },
-    })
-    
+        if cookies:
+            base['cookiefile'] = cookies
+
     elif 'soundcloud.com' in url_lower:
-        base.update({
-            'format': 'bestaudio/best',
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            },
-        })
-    
-    elif 'twitter.com' in url_lower or 'x.com' in url_lower:
-        base.update({'format': 'best'})
-    
+        cookies = get_cookies_file('soundcloud')
+        base.update({'format': 'bestaudio/best'})
+        if cookies:
+            base['cookiefile'] = cookies
+
     elif 'linkedin.com' in url_lower:
         base.update({'format': 'best'})
-    
-    elif 'snapchat.com' in url_lower:
+
+    elif 'threads.net' in url_lower:
+        cookies = get_cookies_file('instagram')
         base.update({'format': 'best'})
-    
+        if cookies:
+            base['cookiefile'] = cookies
+
     else:
         base.update({'format': 'best'})
     
