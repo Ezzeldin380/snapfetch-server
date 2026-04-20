@@ -8,8 +8,16 @@ app = Flask(__name__)
 COOKIES_DIR = os.path.join(os.path.dirname(__file__), 'cookies')
 
 def get_cookies_file(platform):
-    path = os.path.join(COOKIES_DIR, f'{platform}.txt')
-    return path if os.path.exists(path) else None
+    # التأكد من وجود المجلد أولاً
+    if not os.path.exists(COOKIES_DIR):
+        return None
+    
+    # البحث عن أي ملف يحتوي على اسم المنصة (مثل facebook أو snapchat)
+    for filename in os.listdir(COOKIES_DIR):
+        if platform in filename.lower() and filename.endswith('.txt'):
+            return os.path.join(COOKIES_DIR, filename)
+    
+    return None
 
 @app.route('/')
 def home():
