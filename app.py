@@ -19,71 +19,82 @@ def download():
     url = data.get('url', '')
     if not url: return jsonify({'error': 'No URL provided'}), 400
     
+    # تحويل رابط الـ Share لرابط بروفايل مباشر لو أمكن
+    if 'add/' in url:
+        username = url.split('add/')[1].split('?')[0]
+        url = f"https://www.snapchat.com/add/{username}"
+
     try:
-        # إعدادات "جراحية" للوصول لعمق الداتا
+        # إعدادات إجبارية لجلب كل المحتوى (Scraping mode)
         ydl_opts = {
             'quiet': True,
-            'extract_flat': True,  # جلب الروابط فقط في البداية لمنع التداخل
+            'extract_flat': True, 
+            'force_generic_extractor': False,
             'cookiefile': get_cookies_file('snapchat'),
+            'ignoreerrors': True,
             'http_headers': {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
             }
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            # الخطوة 1: سحب الميتا داتا الخام
-            result = ydl.extract_info(url, download=False)
+            # استخراج أولي للقائمة
+            info = ydl.extract_info(url, download=False)
             
-            # الخطوة 2: الدخول في كل الـ Entries المتاحة
-            raw_entries = []
-            if 'entries' in result:
-                raw_entries = list(result['entries'])
-            else:
-                raw_entries = [result]
+            if not info or 'entries' not in info:
+                # محاولة تانية: لو فشل كـ Playlist جربه كـ Video فردي
+                info = ydl.extract_info(url, download=False, process=True)
 
             items = []
-            seen_media_urls = set() # الفلتر النهائي لمنع تكرار الميديا نفسها
+            seen_ids = set()
 
-            for entry in raw_entries:
+            # التأكد من وجود داتا
+            entries = info.get('entries', [info]) if info else []
+
+            for entry in entries:
                 if not entry: continue
                 
-                # تجاهل السبوتلايت فوراً
-                web_url = str(entry.get('url', '') or entry.get('webpage_url', '')).lower()
-                if 'spotlight' in web_url:
+                # 1. فلترة السبوتلايت الصارمة
+                web_url = entry.get('url', '').lower() or entry.get('webpage_url', '').lower()
+                title = entry.get('title', '').lower()
+                if 'spotlight' in web_url or 'spotlight' in title:
                     continue
 
-                # الخطوة 3: عمل Extract "حقيقي" لكل سنابة لوحدها لفك النوع والجودة
-                try:
-                    # هنا بنجبره يعمل ريفريش لكل عنصر عشان نتأكد هو صورة ولا فيديو
-                    detail = ydl.extract_info(entry.get('url'), download=False, process=True)
-                    
-                    # جلب الرابط المباشر للميديا
-                    media_url = detail.get('url') or (detail.get('formats')[-1]['url'] if detail.get('formats') else None)
-                    
-                    if not media_url or media_url in seen_media_urls:
-                        continue
-                    
-                    # كشف النوع (صورة/فيديو) بناءً على غياب كوديك الفيديو
-                    vcodec = detail.get('vcodec', 'none')
-                    ext = detail.get('ext', '').lower()
-                    is_image = vcodec == 'none' or ext in ['jpg', 'jpeg', 'png']
+                # 2. منع التكرار (ID)
+                entry_id = entry.get('id')
+                if not entry_id or entry_id in seen_ids:
+                    continue
 
-                    items.append({
-                        'index': len(items) + 1,
-                        'url': media_url,
-                        'title': detail.get('title', 'Snap Story'),
-                        'type': 'image' if is_image else 'video',
-                        'quality': f"{detail.get('height', '1080')}p" if detail.get('height') else "HD",
-                        'ext': 'jpg' if is_image else 'mp4',
-                        'thumbnail': detail.get('thumbnail', ''),
-                        'duration': str(detail.get('duration', '')) if not is_image else '0'
-                    })
-                    seen_media_urls.add(media_url)
+                # 3. معالجة النوع (صورة/فيديو)
+                # هنا بنعمل جلب للمعلومات الدقيقة للعنصر ده لوحده
+                try:
+                    # سحب بيانات السنابة الواحدة
+                    sub_info = ydl.extract_info(entry.get('url'), download=False, process=True)
+                    
+                    vcodec = sub_info.get('vcodec', 'none')
+                    ext = sub_info.get('ext', '').lower()
+                    is_image = vcodec == 'none' or ext in ['jpg', 'jpeg', 'png']
+                    
+                    direct_url = sub_info.get('url') or (sub_info['formats'][-1]['url'] if sub_info.get('formats') else None)
+                    
+                    if direct_url:
+                        items.append({
+                            'index': len(items) + 1,
+                            'url': direct_url,
+                            'title': sub_info.get('title', 'Snap Story'),
+                            'type': 'image' if is_image else 'video',
+                            'quality': f"{sub_info.get('height', '1080')}p" if sub_info.get('height') else "HD",
+                            'ext': 'jpg' if is_image else 'mp4',
+                            'thumbnail': sub_info.get('thumbnail', ''),
+                            'duration': str(sub_info.get('duration', '')) if not is_image else '0'
+                        })
+                        seen_ids.add(entry_id)
                 except:
-                    continue # لو فشل في عنصر يكمل الباقي
+                    continue
 
             if not items:
-                return jsonify({'error': 'No stories found.'}), 404
+                return jsonify({'error': 'No public stories found. Server might be blocked or cookies expired.'}), 404
                 
             return jsonify({'items': items})
             
