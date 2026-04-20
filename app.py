@@ -1,6 +1,14 @@
 from flask import Flask, request, jsonify
 import yt_dlp
 import os
+import subprocess
+import sys
+
+# تحديث المكتبة عند بدء التشغيل
+try:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-U", "yt-dlp"])
+except Exception as e:
+    print(f"Update failed: {e}")
 
 app = Flask(__name__)
 
@@ -20,10 +28,9 @@ def download():
     if not url: return jsonify({'error': 'No URL provided'}), 400
     
     try:
-        # إعدادات لكسر حماية سناب شات وجلب القائمة كاملة
         ydl_opts = {
             'quiet': True,
-            'extract_flat': 'in_playlist', # يجيب الروابط الأول عشان نتحكم فيها
+            'extract_flat': 'in_playlist',
             'cookiefile': get_cookies_file('snapchat'),
             'http_headers': {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
@@ -31,42 +38,45 @@ def download():
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            # الخطوة 1: سحب "خريطة" الحساب
+            # 1. سحب خريطة الحساب (بدون معالجة كاملة في البداية لسرعة جلب القائمة)
             info = ydl.extract_info(url, download=False)
             
-            if 'entries' not in info:
-                return jsonify({'error': 'Could not find stories list. Ensure the profile is public.'}), 404
+            # التأكد من وجود قصص
+            raw_entries = info.get('entries', [])
+            if not raw_entries and 'url' in info:
+                raw_entries = [info] # حالة لو الرابط لسنابة واحدة فقط
+            
+            if not raw_entries:
+                return jsonify({'error': 'No stories found in this account.'}), 404
 
             items = []
             seen_media_ids = set()
 
-            # الخطوة 2: المرور على كل "سنابة" بشكل منفصل
-            for entry in info['entries']:
+            # 2. اللوب على كل القصص المتاحة (بدون ليميت)
+            for entry in raw_entries:
                 if not entry: continue
                 
-                entry_url = entry.get('url', '')
+                entry_url = entry.get('url') or entry.get('webpage_url')
+                if not entry_url: continue
                 
-                # 1. فلترة السبوتلايت (Spotlight) فوراً
-                if 'spotlight' in entry_url.lower():
-                    continue
+                # فلترة السبوتلايت فوراً قبل الدخول في التفاصيل
+                if 'spotlight' in entry_url.lower(): continue
                 
-                # 2. جلب بيانات السنابة الواحدة بدقة
                 try:
-                    # بنطلب منه يعيد فحص الرابط ده بالذات عشان نعرف هو صورة ولا فيديو
+                    # فحص تفصيلي لكل سنابة
                     snap_detail = ydl.extract_info(entry_url, download=False, process=True)
                     
-                    # منع التكرار بناءً على الـ ID الحقيقي للميديا
                     snap_id = snap_detail.get('id')
-                    if snap_id in seen_media_ids: continue
+                    if not snap_id or snap_id in seen_media_ids: continue
 
-                    # 3. تحديد النوع (صورة أم فيديو)
-                    # سناب شات للصور لا يضع vcodec أو يضع 'none'
+                    # تحديد النوع (صورة/فيديو)
                     vcodec = snap_detail.get('vcodec', 'none')
                     ext = snap_detail.get('ext', '').lower()
-                    is_image = (vcodec == 'none' or ext in ['jpg', 'jpeg', 'png'])
+                    is_image = (vcodec == 'none' or any(x in ext for x in ['jpg', 'jpeg', 'png', 'webp']))
 
-                    # جلب الرابط المباشر
-                    direct_url = snap_detail.get('url') or (snap_detail['formats'][-1]['url'] if snap_detail.get('formats') else None)
+                    direct_url = snap_detail.get('url')
+                    if not direct_url and snap_detail.get('formats'):
+                        direct_url = snap_detail['formats'][-1].get('url')
 
                     if direct_url:
                         items.append({
@@ -77,22 +87,21 @@ def download():
                             'quality': f"{snap_detail.get('height', '1080')}p" if snap_detail.get('height') else "HD",
                             'ext': 'jpg' if is_image else 'mp4',
                             'thumbnail': snap_detail.get('thumbnail', ''),
-                            'duration': str(snap_detail.get('duration', '')) if not is_image else '0'
+                            'duration': str(snap_detail.get('duration', '0')) if not is_image else '0'
                         })
                         seen_media_ids.add(snap_id)
-                        
-                        # اختياري: لو عايز توقف عند أول 20 ستوري بس
-                        if len(items) >= 20: break
                 except:
+                    # لو سنابة فيها مشكلة (مثلاً اتمسحت وقت السحب) يتخطاها ويكمل الباقي
                     continue
 
-            if not items:
-                return jsonify({'error': 'No public stories extracted.'}), 404
-                
-            return jsonify({'items': items})
+            return jsonify({
+                'total_found': len(items),
+                'items': items
+            })
             
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+    # تشغيل السيرفر على بورت 8080 (أو حسب إعدادات السيرفر)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
