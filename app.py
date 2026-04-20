@@ -5,23 +5,23 @@ import re
 
 app = Flask(__name__)
 
+# مسار مجلد الكوكيز
 COOKIES_DIR = os.path.join(os.path.dirname(__file__), 'cookies')
 
 def get_cookies_file(platform):
-    # التأكد من وجود المجلد أولاً
+    """دالة ذكية للبحث عن ملف الكوكيز الخاص بالمنصة"""
     if not os.path.exists(COOKIES_DIR):
         return None
     
-    # البحث عن أي ملف يحتوي على اسم المنصة (مثل facebook أو snapchat)
     for filename in os.listdir(COOKIES_DIR):
+        # البحث عن اسم المنصة داخل اسم الملف (مثلاً بحث عن 'facebook' في 'www.facebook.com_cookies.txt')
         if platform in filename.lower() and filename.endswith('.txt'):
             return os.path.join(COOKIES_DIR, filename)
-    
     return None
 
 @app.route('/')
 def home():
-    return jsonify({'status': 'SnapFetch Server Running!'})
+    return jsonify({'status': 'SnapFetch Server is Running!', 'author': 'Ezzeldin'})
 
 @app.route('/download', methods=['POST'])
 def download():
@@ -41,6 +41,7 @@ def download():
             items = []
             index = 1
             
+            # التعامل مع القوائم أو الفيديوهات المتعددة
             if 'entries' in info and info['entries']:
                 for entry in info['entries']:
                     if entry:
@@ -61,8 +62,8 @@ def download():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
 def clean_url(url):
+    """تنظيف الرابط من أي زيادات"""
     url = url.strip()
     if 'soundcloud.com' in url:
         match = re.search(r'https?://(?:on\.)?soundcloud\.com/\S+', url)
@@ -70,211 +71,86 @@ def clean_url(url):
             return match.group(0)
     return url
 
-
 def get_options(url):
+    # صيغة جلب أفضل فيديو مدمج بصوته لضمان الجودة العالية بدون FFmpeg
+    best_format = 'bestvideo[ext=mp4][vcodec^=avc1]+bestaudio[ext=m4a]/best[ext=mp4]/best'
+    
     base = {
         'quiet': True,
         'no_warnings': True,
         'extract_flat': False,
         'socket_timeout': 30,
+        'format': best_format, # تطبيق الصيغة عالمياً
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+        }
     }
     
     url_lower = url.lower()
     
-    if 'tiktok.com' in url_lower:
-        cookies = get_cookies_file('tiktok')
-        base.update({
-            'format': 'best[ext=mp4]/best',
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            },
-        })
-        if cookies:
-            base['cookiefile'] = cookies
-
+    # تحديد المنصة لجلب ملف الكوكيز الخاص بها
+    platform = None
+    if 'tiktok.com' in url_lower: platform = 'tiktok'
     elif 'youtube.com' in url_lower or 'youtu.be' in url_lower:
-        cookies = get_cookies_file('youtube')
         if 'music.youtube.com' in url_lower:
-            base.update({'format': 'bestaudio/best'})
-        else:
-            base.update({'format': 'best[ext=mp4]/best'})
+            base['format'] = 'bestaudio/best'
+        platform = 'youtube'
+    elif 'instagram.com' in url_lower: platform = 'instagram'
+    elif 'facebook.com' in url_lower or 'fb.watch' in url_lower: platform = 'facebook'
+    elif 'twitter.com' in url_lower or 'x.com' in url_lower: platform = 'twitter'
+    elif 'reddit.com' in url_lower or 'redd.it' in url_lower: platform = 'reddit'
+    elif 'pinterest.com' in url_lower or 'pin.it' in url_lower: platform = 'pinterest'
+    elif 'snapchat.com' in url_lower: platform = 'snapchat'
+    elif 'kwai.com' in url_lower or 'kwai.me' in url_lower: platform = 'kwai'
+    elif 'soundcloud.com' in url_lower: 
+        platform = 'soundcloud'
+        base['format'] = 'bestaudio/best'
+    elif 'threads.net' in url_lower: platform = 'instagram' # ثريدز غالباً بيستخدم كوكيز إنستجرام
+
+    if platform:
+        cookies = get_cookies_file(platform)
         if cookies:
             base['cookiefile'] = cookies
 
-    elif 'instagram.com' in url_lower:
-        cookies = get_cookies_file('instagram')
-        base.update({
-            'format': 'best',
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)',
-            },
-        })
-        if cookies:
-            base['cookiefile'] = cookies
-
-    elif 'facebook.com' in url_lower or 'fb.watch' in url_lower:
-        cookies = get_cookies_file('facebook')
-        base.update({
-            'format': 'best[ext=mp4]/best',
-        })
-        if cookies:
-            base['cookiefile'] = cookies
-
-    elif 'twitter.com' in url_lower or 'x.com' in url_lower:
-        cookies = get_cookies_file('twitter')
-        base.update({'format': 'best'})
-        if cookies:
-            base['cookiefile'] = cookies
-
-    elif 'reddit.com' in url_lower or 'redd.it' in url_lower:
-        cookies = get_cookies_file('reddit')
-        base.update({
-            'format': 'best',
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            },
-        })
-        if cookies:
-            base['cookiefile'] = cookies
-
-    elif 'pinterest.com' in url_lower or 'pin.it' in url_lower:
-        cookies = get_cookies_file('pinterest')
-        base.update({
-            'format': 'best',
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            },
-        })
-        if cookies:
-            base['cookiefile'] = cookies
-
-    elif 'snapchat.com' in url_lower:
-        cookies = get_cookies_file('snapchat')
-        base.update({'format': 'best'})
-        if cookies:
-            base['cookiefile'] = cookies
-
-    elif 'kwai.com' in url_lower or 'kwai.me' in url_lower:
-        cookies = get_cookies_file('kwai')
-        base.update({
-            'format': 'best',
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Linux; Android 12; SM-G991B) AppleWebKit/537.36',
-                'Referer': 'https://www.kwai.com/',
-            },
-        })
-        if cookies:
-            base['cookiefile'] = cookies
-
-    elif 'soundcloud.com' in url_lower:
-        cookies = get_cookies_file('soundcloud')
-        base.update({'format': 'bestaudio/best'})
-        if cookies:
-            base['cookiefile'] = cookies
-
-    elif 'linkedin.com' in url_lower:
-        base.update({'format': 'best'})
-
-    elif 'threads.net' in url_lower:
-        cookies = get_cookies_file('instagram')
-        base.update({'format': 'best'})
-        if cookies:
-            base['cookiefile'] = cookies
-
-    else:
-        base.update({'format': 'best'})
-    
     return base
-
 
 def extract_item(info, index):
     try:
+        # محاولة العثور على الرابط المباشر
+        # في الحالات العادية يكون في 'url'، وفي بعض الحالات نحتاج لأعلى Format
+        url_direct = info.get('url')
+        
         formats = info.get('formats', [])
-        url_direct = info.get('url', '')
-        webpage_url = info.get('webpage_url', '')
-        ext = info.get('ext', '')
+        if not url_direct and formats:
+            # فلترة الفورمات التي تحتوي على روابط واختيار الأفضل (آخر واحد)
+            valid_formats = [f for f in formats if f.get('url')]
+            if valid_formats:
+                url_direct = valid_formats[-1]['url']
         
+        if not url_direct:
+            return None
+
+        ext = info.get('ext', 'mp4')
+        media_type = 'video'
+        
+        # تحديد النوع (صورة/صوت/فيديو)
         if ext in ['jpg', 'jpeg', 'png', 'webp']:
-            return {
-                'index': index,
-                'url': url_direct or webpage_url,
-                'type': 'image',
-                'quality': 'Original',
-                'thumbnail': info.get('thumbnail', ''),
-                'duration': '',
-            }
-        
-        if not formats and url_direct:
-            media_type = 'audio' if ext in ['mp3', 'm4a', 'aac', 'opus'] else 'video'
-            return {
-                'index': index,
-                'url': url_direct,
-                'type': media_type,
-                'quality': 'HD',
-                'thumbnail': info.get('thumbnail', ''),
-                'duration': str(info.get('duration', '')),
-            }
-        
-        best_video = None
-        best_audio = None
-        
-        for f in formats:
-            if not f.get('url'):
-                continue
-            f_ext = f.get('ext', '')
-            vcodec = f.get('vcodec', 'none')
-            acodec = f.get('acodec', 'none')
-            
-            if f_ext in ['jpg', 'jpeg', 'png', 'webp']:
-                return {
-                    'index': index,
-                    'url': f['url'],
-                    'type': 'image',
-                    'quality': 'Original',
-                    'thumbnail': info.get('thumbnail', ''),
-                    'duration': '',
-                }
-            elif vcodec != 'none' and acodec != 'none':
-                if best_video is None or (f.get('height', 0) or 0) > (best_video.get('height', 0) or 0):
-                    best_video = f
-            elif vcodec == 'none' and acodec != 'none':
-                if best_audio is None or (f.get('abr', 0) or 0) > (best_audio.get('abr', 0) or 0):
-                    best_audio = f
-        
-        if best_video:
-            height = best_video.get('height', 0) or 0
-            return {
-                'index': index,
-                'url': best_video['url'],
-                'type': 'video',
-                'quality': f'{height}p' if height else 'HD',
-                'thumbnail': info.get('thumbnail', ''),
-                'duration': str(info.get('duration', '')),
-            }
-        elif best_audio:
-            return {
-                'index': index,
-                'url': best_audio['url'],
-                'type': 'audio',
-                'quality': f"{best_audio.get('abr', 'HD')}kbps",
-                'thumbnail': info.get('thumbnail', ''),
-                'duration': str(info.get('duration', '')),
-            }
-        elif url_direct:
-            return {
-                'index': index,
-                'url': url_direct,
-                'type': 'video',
-                'quality': 'HD',
-                'thumbnail': info.get('thumbnail', ''),
-                'duration': str(info.get('duration', '')),
-            }
-        
-        return None
-        
+            media_type = 'image'
+        elif ext in ['mp3', 'm4a', 'aac', 'opus'] or 'audio' in info.get('format', '').lower():
+            media_type = 'audio'
+
+        return {
+            'index': index,
+            'url': url_direct,
+            'title': info.get('title', f'Media_{index}'),
+            'type': media_type,
+            'quality': f"{info.get('height', 'HD')}p" if info.get('height') else 'High Quality',
+            'thumbnail': info.get('thumbnail', ''),
+            'duration': str(info.get('duration', '')),
+            'ext': ext
+        }
     except Exception:
         return None
-
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
