@@ -38,14 +38,26 @@ def download():
                 for entry in info['entries']:
                     if not entry:
                         continue
-                    # تخطي Spotlight في Snapchat
                     entry_url = entry.get('url', '') or entry.get('webpage_url', '')
                     if 'spotlight' in entry_url.lower():
                         continue
-                    item = extract_item(entry, index)
-                    if item:
-                        items.append(item)
-                        index += 1
+                    # لو الـ entry فيها entries تانية (nested playlist)
+                    if 'entries' in entry and entry['entries']:
+                        for sub_entry in entry['entries']:
+                            if not sub_entry:
+                                continue
+                            sub_url = sub_entry.get('url', '') or sub_entry.get('webpage_url', '')
+                            if 'spotlight' in sub_url.lower():
+                                continue
+                            item = extract_item(sub_entry, index)
+                            if item:
+                                items.append(item)
+                                index += 1
+                    else:
+                        item = extract_item(entry, index)
+                        if item:
+                            items.append(item)
+                            index += 1
             else:
                 item = extract_item(info, index)
                 if item:
@@ -84,7 +96,11 @@ def get_options(url):
 
     if 'snapchat.com' in url_lower:
         cookies = get_cookies_file('snapchat')
-        base.update({'format': 'best'})
+        base.update({
+            'format': 'best',
+            'noplaylist': False,
+            'playlistend': 100,
+        })
         if cookies:
             base['cookiefile'] = cookies
 
