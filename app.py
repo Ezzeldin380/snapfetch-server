@@ -99,7 +99,7 @@ def get_options(url):
         if 'music.youtube.com' in url_lower:
             base.update({'format': 'bestaudio/best'})
         else:
-            base.update({'format': 'best[ext=mp4]/best'})
+            base.update({'format': 'best'})
         if cookies:
             base['cookiefile'] = cookies
 
